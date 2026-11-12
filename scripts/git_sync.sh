@@ -5,7 +5,7 @@
 #   type: feat | fix | docs | example
 #
 # 为什么需要它:
-#   1) 本机全局 git 代理常指向未启动的 127.0.0.1:7897, 直接 push 会失败; 这里先绕过代理直连.
+#   1) 先按 git 配置的代理推送; 代理未启动(127.0.0.1:7897 常见)时自动绕过代理直连重试.
 #   2) 统一"工作区干净就跳过", 避免为提交而提交.
 #   3) 推送失败时保留本地提交并打印重试命令, 不丢演进成果.
 set -uo pipefail
@@ -27,12 +27,18 @@ fi
 git add -A && git commit -m "$msg" || exit 1
 echo "已提交: $(git rev-parse --short HEAD) $msg"
 
-# 全局代理 127.0.0.1:7897 常未启动; 先绕过代理直连, 失败再退回默认配置.
-if git -c http.proxy= -c https.proxy= push 2>/dev/null; then
+pushed=0
+if git push 2>/dev/null; then
+  pushed=1
+elif git -c http.proxy= -c https.proxy= push 2>/dev/null; then
+  pushed=1
+fi
+
+if [ "$pushed" = 1 ]; then
   echo "已推送: $(git rev-parse --short HEAD)"
 else
   echo "推送失败: 本地提交已保留. 网络恢复后执行:" >&2
-  echo "  git -c http.proxy= -c https.proxy= push" >&2
+  echo "  git push   # 或 git -c http.proxy= -c https.proxy= push" >&2
   echo "  若提示 non-fast-forward, 先 git pull --rebase 再重试." >&2
   exit 2
 fi
