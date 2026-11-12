@@ -1,0 +1,18 @@
+{
+  "name": "dsh-headful-browser",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Headful Chromium control console driven over the Chrome DevTools Protocol (TypeScript, zero runtime deps)",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "smoke": "node smoke.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

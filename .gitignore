@@ -1,0 +1,11 @@
+# 运行时依赖(仅 typescript + @types/node 两个 devDependency,运行技能不需要)
+node_modules/
+
+# 运行时产物:正常写在 ~/.dsh/browser-runtime/,这里再兜一层
+browser-runtime/
+
+# 杂项
+.DS_Store
+*.log
+*.tsbuildinfo
+__pycache__/

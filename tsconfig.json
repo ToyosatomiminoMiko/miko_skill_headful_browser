@@ -1,0 +1,35 @@
+{
+  // 是什么:整个技能的单一类型闸门。`npm run typecheck` 跑的就是它。
+  // 为什么这样配:
+  //  - noEmit:源码直接用 Node 原生类型剥离运行(`node serve.ts`),不存在编译产物,
+  //    所以 tsc 只做类型检查、绝不生成 JS;这也杜绝了「忘了重新编译」这类不确定性。
+  //  - allowImportingTsExtensions:运行时 import 必须写 `./lib/cdp.ts`(Node 剥离模式
+  //    不做扩展名补全),只有打开这个开关 tsc 才允许带 .ts 后缀地 import,且必须配 noEmit。
+  //  - erasableSyntaxOnly:强制只用「可擦除」语法(不许 enum / namespace / 构造函数参数属性),
+  //    保证 `node xxx.ts` 一定能跑 —— 这是本技能零构建的前提。
+  //  - verbatimModuleSyntax:类型导入必须写成 `import type`,否则剥离后会留下真实 import
+  //    去加载一个只有类型的模块,运行时直接炸。这条是硬性防呆。
+  //  - noUncheckedIndexedAccess:argv[i] / size[0] / entries[i-1] 一律变成 `T | undefined`,
+  //    逼着把「可能拿不到」的分支写清楚 —— 数组下标是本技能历史上最容易写错的地方。
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    // 未使用的局部变量/参数直接报错:审计发现的 dead import(existsSync)本该被这里拦下。
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["*.ts", "lib/**/*.ts"]
+}
